@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-app-deployment
+  labels:
+    app: python-app
+    type: backend
+spec:
+  selector:
+    matchLabels:
+      app: python-app
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      name: python-app-pod
+      labels:
+        app: python-app
+        type: backend
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: app-deployment
+                operator: In
+                values:
+                - "True"
+      containers:
+        - name: python-app
+          image: anayyadav/python-app:latest
+          ports:
+          - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: python-app-conifgmap
+          resources:
+            requests:
+              memory: "80M"
+              cpu: "50m"
+            limits:
+              memory: "128M"
+              cpu: "150m"
+          livenessProbe:
+            tcpSocket:
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 50
+            failureThreshold: 8
+          readinessProbe:
+            tcpSocket:
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 50
+            failureThreshold: 8

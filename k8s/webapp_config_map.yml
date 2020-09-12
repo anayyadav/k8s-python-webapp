@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: python-app-conifgmap
+data:
+  PORT: "5000"
+  HOST: "0.0.0.0"
